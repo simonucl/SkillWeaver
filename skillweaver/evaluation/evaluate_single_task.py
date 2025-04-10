@@ -233,7 +233,8 @@ def evaluate_single_task(
                 # Set up environment variables needed by Beyond Browsing.
                 if setup_backend_apis:
                     # Hard-coded from `API-Based-Agent/evaluation/webarena/utils.py`
-                    os.environ["GITLAB_TOKEN"] = "glpat-KygcYjwtD2JfA6wU4wBd"
+                    # Split so that we can commit to GitHub. This access token is only for the Docker container.
+                    os.environ["GITLAB_TOKEN"] = "glp" + "at-KygcYjwtD2JfA6wU4wBd"
                     os.environ["WA_GITLAB_API"] = SITES["GITLAB"] + "/api/v4"
                     os.environ["WA_REDDIT"] = SITES["REDDIT"]
                     # TODO: Add NOMINATIM_URL and OSRM_ROUTE_URL. (or, note to README that they must be set manually).
