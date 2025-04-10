@@ -1,7 +1,14 @@
-<h2 align="center">SkillWeaver <br> Web Agents can Self-Improve by Discovering and Honing Skills</h2>
+<h1 align="center">SkillWeaver <br> Web Agents can Self-Improve by Discovering and Honing Skills</h1>
 
-SkillWeaver is a framework to enable web agent self-improvement through environment exploration and skill synthesis.
+<p align="center">
+<a href="https://www.python.org/downloads/release/python-3109/"><img src="https://img.shields.io/badge/python-3.10-blue.svg" alt="Python 3.10"></a>
+<a href="https://playwright.dev/python/docs/intro"><img src="https://img.shields.io/badge/Playwright-1.44-green.svg" alt="Playwright"></a>
+<a href="https://github.com/OSU-NLP-Group/SkillWeaver"><img src="https://img.shields.io/github/stars/OSU-NLP-Group/SkillWeaver?style=social" alt="GitHub Stars"></a>
+<a href="https://github.com/OSU-NLP-Group/SeeAct/issues"><img src="https://img.shields.io/github/issues-raw/OSU-NLP-Group/SkillWeaver" alt="Open Issues"></a>
+<a href="https://twitter.com/osunlp"><img src="https://img.shields.io/twitter/follow/OSU_NLP_Group" alt="Twitter Follow"></a>
+</p>
 
+SkillWeaver is a skill-centric framework enabling agents to self-improve by autonomously synthesizing reusable skills as APIs. Given a new website, the agent autonomously discovers skills, executes them for practice, and distills practice experiences into robust APIs. Iterative exploration continually expands a library of lightweight, plug-and-play APIs, significantly enhancing the agent's capabilities. 
 
 ![Demo Video GIF](assets/final_drug_baseline_boyuan-no_terminal-speedup.gif)
 
