@@ -4,14 +4,18 @@ except ImportError:
     print("Please install browser-use with `pip install browser-use`.")
     exit(1)
 
-import sys
-import traceback
 import dotenv
+
+from skillweaver.environment.patches import apply_patches
+
+apply_patches()
 
 dotenv.load_dotenv()
 import asyncio
 import json
 import os
+import sys
+import traceback
 from contextlib import nullcontext
 from datetime import datetime
 from typing import Optional

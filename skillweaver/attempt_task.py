@@ -251,10 +251,12 @@ async def cli(
     max_steps: int = 10,
     headless: bool = False,
 ):
-    from skillweaver.evaluation.webarena_config import SITES
-    from skillweaver.containerization.containers import containers
-    from skillweaver.evaluation.webarena_login import login_subprocess
     from contextlib import nullcontext
+
+    from skillweaver.containerization.containers import containers
+    from skillweaver.environment.patches import apply_patches
+    from skillweaver.evaluation.webarena_config import SITES
+    from skillweaver.evaluation.webarena_login import login_subprocess
 
     # required to be able to use JSON schema
     lm = LM(agent_lm_name)
@@ -276,6 +278,8 @@ async def cli(
             setup_site = site.lower()
             start_url = start_url[len(start_string) :]
             break
+
+    apply_patches()
 
     async def impl():
         nonlocal start_url
