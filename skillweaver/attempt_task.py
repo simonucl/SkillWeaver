@@ -246,7 +246,7 @@ async def attempt_task(
 async def cli(
     start_url: str,
     task: str,
-    lm_name: str = "gpt-4o",
+    agent_lm_name: str = "gpt-4o",
     knowledge_base_path_prefix: Optional[str] = None,
     max_steps: int = 10,
     headless: bool = False,
@@ -257,7 +257,7 @@ async def cli(
     from contextlib import nullcontext
 
     # required to be able to use JSON schema
-    lm = LM(lm_name)
+    lm = LM(agent_lm_name)
 
     if knowledge_base_path_prefix is None:
         knowledge_base = KnowledgeBase()
@@ -266,7 +266,7 @@ async def cli(
         knowledge_base.hide_unverified = False
 
     log_dir = os.path.join(
-        "logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_" + lm_name
+        "logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_" + agent_lm_name
     )
 
     setup_site: str | None = None
@@ -299,12 +299,13 @@ async def cli(
                     if "shopping_admin" in container_hostnames:
                         SITES["SHOPPING_ADMIN"] = SITES["SHOPPING_ADMIN"] + "/admin"
                 else:
-                    container_hostnames = {setup_site: SITES[setup_site]}
+                    container_hostnames = {setup_site: SITES[setup_site.upper()]}
 
                 storage_state_file = login_subprocess(container_hostnames)
 
                 # Replace the start_url with the container hostname.
-                start_url = start_url[len(f"__{setup_site}__") :]
+                start_url = SITES[setup_site.upper()] + start_url
+                print("Start URL:", start_url)
             else:
                 storage_state_file = None
 

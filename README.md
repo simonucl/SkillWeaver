@@ -32,17 +32,17 @@ export AZURE_OPENAI_gpt-4o_API_KEY=<endpoint API key>
 To attempt a task, you can use the following command:
 
 ```bash
-python -m skillweaver.attempt_task [start URL] [task]
+python -m skillweaver.attempt_task <start-url> <task> [...options]
 ```
 
 Arguments:
 
-- `start URL`: The URL to start the task from.
+- `start-url`: The URL to start the task from. You can use `__REDDIT__`, `__MAP__`, `__SHOPPING__`, `__SHOPPING_ADMIN__`, and `__GITLAB__` as the prefix if you would like to load the address from environment variables and perform the login step (required for most WebArena tasks).
 - `task`: The task to attempt. This should be a string that describes the task to be attempted.
 - `--agent-lm-name [lm_name]`: The name of the LLM to use for the agent. Default: `gpt-4o`.
 - `--max-steps`: The agent's time limit to complete the task, as measured in generated actions. Default: 10.
-- `--store-dir`: Where to output the results of the task attempt. Default: `logs/tmp`.
-- `--exploration-dir`: The path to the synthesized APIs. If not specified, attempts the task without any generated APIs (e.g., the parent folder of `iter_0`).
+- `--knowledge-base-path-prefix`: The path to the synthesized APIs (without `_code.py`). For example, `logs/explore-reddit-gpt4o/iter_79/kb_post`.
+- `--headless`: Whether to attempt the task in headless mode.
 
 For example, to try a task on the `reddit` website, you could use the following command:
 
@@ -54,6 +54,36 @@ To compare the performance without the knowledge base, remove the `--knowledge-b
 
 ```bash
 python -m skillweaver.attempt_task __REDDIT__ "Post to the gaming forum to ask about the best agmes of the year"
+```
+
+### Browser-Use Version
+
+This is an experimental version that uses the agent from [Browser-Use](https://browser-use.com/). It converts our knowledge base into a Browser-Use `Controller` object that can be used to extend the action space of an existing agent.
+
+To attempt a task, you can use the following command:
+
+```bash
+python -m skillweaver.attempt_task_browser_use <start-url> <task> [...options]
+```
+
+Arguments:
+
+- `start-url`: The URL to start the task from. You can use `__REDDIT__`, `__MAP__`, `__SHOPPING__`, `__SHOPPING_ADMIN__`, and `__GITLAB__` as the prefix if you would like to load the address from environment variables and perform the login step (required for most WebArena tasks).
+- `task`: The task to attempt. This should be a string that describes the task to be attempted.
+- `--agent-lm-name [lm_name]`: The name of the LLM to use for the agent. Default: `gpt-4o`.
+- `--knowledge-base-path-prefix`: The path to the synthesized APIs (without `_code.py`). For example, `logs/explore-reddit-gpt4o/iter_79/kb_post`.
+- `--headless`: Whether to attempt the task in headless mode.
+
+For example, to try a task on the `reddit` website, you could use the following command:
+
+```bash
+python -m skillweaver.attempt_task_browser_use __REDDIT__ "Post to the gaming forum to ask about the best games of the year" --knowledge-base-path-prefix skill_library/reddit/reddit_kb_post
+```
+
+To compare the performance without the knowledge base, remove the `--knowledge-base-path-prefix` argument:
+
+```bash
+python -m skillweaver.attempt_task_browser_use __REDDIT__ "Post to the gaming forum to ask about the best agmes of the year"
 ```
 
 ## Explore a Website

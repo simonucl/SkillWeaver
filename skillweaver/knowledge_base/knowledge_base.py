@@ -457,16 +457,17 @@ class KnowledgeBase:
         )
         fns_string = ""
         valid_functions = []
-        for function_name in response["relevant_function_names"]:
-            function = next(
-                (f for f in skills if f["name"] == function_name["name"]), None
-            )
+        for function_name_struct in response["relevant_function_names"]:
+            function_name = function_name_struct["name"]
+            if "(" in function_name:
+                function_name = function_name[: function_name.index("(")]
+            function = next((f for f in skills if f["name"] == function_name), None)
             if function is not None:
                 fns_string += format_function_as_pretty_string(function)
                 valid_functions.append(function)
             else:
                 await aprint(
-                    f"Warning: function returned from the retrieval step was not found in knowledge base: {function_name['name']}"
+                    f"Warning: function returned from the retrieval step was not found in knowledge base: {function_name}"
                 )
 
         return (valid_functions, fns_string, response["step_by_step_reasoning"])
@@ -542,6 +543,9 @@ for function_name in {function_names}:
         # Set up a sandbox code block for the functions to be added.
         sandbox_code = ""
         for function_name, function in parsed_functions.items():
+            if function_name not in function_names:
+                continue
+            
             function_ast = ast.parse(function["source"]).body[0]
             assert isinstance(function_ast, (ast.FunctionDef, ast.AsyncFunctionDef))
 
@@ -577,6 +581,8 @@ for function_name in {function_names}:
         if debug:
             with open("sandbox_code.py", "w") as f:
                 f.write(sandbox_code)
+
+            print(function_objects.keys())
 
         exec(
             sandbox_code,
