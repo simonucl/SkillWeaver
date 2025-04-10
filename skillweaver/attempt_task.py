@@ -4,19 +4,19 @@ import json
 import os
 import re
 from datetime import datetime
-from typing import Callable, Coroutine
+from typing import Optional
 
-import click
 import nest_asyncio
 from aioconsole import aprint
 from playwright.async_api import async_playwright
+
 from skillweaver.agent import codegen_do, codegen_generate, codegen_trajectory_to_string
 from skillweaver.create_skill_library_prompt import (
     create_skill_library_prompt,
     get_task_string,
 )
 from skillweaver.environment import Browser, State, make_browser
-from skillweaver.knowledge_base.knowledge_base import KnowledgeBase
+from skillweaver.knowledge_base.knowledge_base import KnowledgeBase, load_knowledge_base
 from skillweaver.lm import LM
 
 nest_asyncio.apply()
@@ -243,37 +243,93 @@ async def attempt_task(
     return (states, actions)
 
 
-def coro(fn: Callable[..., Coroutine]):
-    def wrapper(*args, **kwargs):
-        return asyncio.run(fn(*args, **kwargs))
+async def cli(
+    start_url: str,
+    task: str,
+    lm_name: str = "gpt-4o",
+    knowledge_base_path_prefix: Optional[str] = None,
+    max_steps: int = 10,
+    headless: bool = False,
+):
+    from skillweaver.evaluation.webarena_config import SITES
+    from skillweaver.containerization.containers import containers
+    from skillweaver.evaluation.webarena_login import login_subprocess
+    from contextlib import nullcontext
 
-    return wrapper
-
-
-@click.command()
-@click.option("--start_url", type=str, required=True)
-@click.option("--task", type=str, required=True)
-@click.option("--lm_name", type=str, default="gpt-4o-2024-08-06")
-@coro
-async def test_out(start_url: str, task: str, lm_name: str):
     # required to be able to use JSON schema
     lm = LM(lm_name)
 
-    kb = KnowledgeBase()
+    if knowledge_base_path_prefix is None:
+        knowledge_base = KnowledgeBase()
+    else:
+        knowledge_base = load_knowledge_base(knowledge_base_path_prefix)
+        knowledge_base.hide_unverified = False
 
-    async with async_playwright() as p:
-        os.makedirs("logs/tmp", exist_ok=True)
-        browser = await make_browser(p, start_url, headless=True)
-        await attempt_task(
-            browser,
-            lm,
-            {"type": "explore", "task": task},
-            max_steps=3,
-            knowledge_base=kb,
-            store_dir="logs/tmp",
-        )
-        await browser.close()
+    log_dir = os.path.join(
+        "logs", datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + "_" + lm_name
+    )
+
+    setup_site: str | None = None
+    for site in SITES:
+        start_string = f"__{site}__"
+        if start_url.startswith(start_string):
+            setup_site = site.lower()
+            start_url = start_url[len(start_string) :]
+            break
+
+    async def impl():
+        nonlocal start_url
+
+        use_manual_containers = os.getenv("CONTAINER_SETUP", "auto").lower() == "manual"
+        async with (
+            containers([setup_site])
+            if setup_site is not None and not use_manual_containers
+            else nullcontext({})
+        ) as container_hostnames:
+            if setup_site is not None:
+                if not use_manual_containers:
+                    # Updates the process-level configuration for hostname resolution.
+                    SITES.update(
+                        {
+                            k.upper(): "http://" + v
+                            for k, v in container_hostnames.items()
+                        }
+                    )
+                    # shopping_admin start page is '/admin', not '/'.
+                    if "shopping_admin" in container_hostnames:
+                        SITES["SHOPPING_ADMIN"] = SITES["SHOPPING_ADMIN"] + "/admin"
+                else:
+                    container_hostnames = {setup_site: SITES[setup_site]}
+
+                storage_state_file = login_subprocess(container_hostnames)
+
+                # Replace the start_url with the container hostname.
+                start_url = start_url[len(f"__{setup_site}__") :]
+            else:
+                storage_state_file = None
+
+            async with async_playwright() as p:
+                os.makedirs(log_dir, exist_ok=True)
+                browser = await make_browser(
+                    p,
+                    start_url,
+                    headless=headless,
+                    storage_state=storage_state_file,
+                )
+                await attempt_task(
+                    browser,
+                    lm,
+                    {"type": "prod", "task": task},
+                    max_steps=max_steps,
+                    knowledge_base=knowledge_base,
+                    store_dir=log_dir,
+                )
+                await browser.close()
+
+    asyncio.run(impl())
 
 
 if __name__ == "__main__":
-    test_out()
+    import typer
+
+    typer.run(cli)
