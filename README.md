@@ -40,7 +40,7 @@ AZURE_OPENAI_gpt-4o_API_KEY=<endpoint API key>
 To attempt a task, you can use the following command:
 
 ```bash
-python -m webrover.attempt_task [start URL] [task]
+python -m skillweaver.attempt_task [start URL] [task]
 ```
 
 Arguments:
@@ -52,22 +52,28 @@ Arguments:
 - `--store-dir`: Where to output the results of the task attempt. Default: `logs/tmp`.
 - `--exploration-dir`: The path to the synthesized APIs. If not specified, attempts the task without any generated APIs (e.g., the parent folder of `iter_0`).
 
-For example, to try a task on the `reddit` website using the knowledge base generated in the previous example, you could use the following command:
+For example, to try a task on the `reddit` website, you could use the following command:
 
 ```bash
-python -m webrover.attempt_task reddit "Post to the gaming forum to ask about the best agmes of the year" --exploration-dir logs/explore-reddit-gpt-4o
+python -m skillweaver.attempt_task __REDDIT__ "Post to the gaming forum to ask about the best games of the year" --knowledge-base-path-prefix skill_library/reddit/reddit_kb_post
 ```
 
+To compare the performance without the knowledge base, remove the `--knowledge-base-path-prefix` argument:
+
+```bash
+python -m skillweaver.attempt_task __REDDIT__ "Post to the gaming forum to ask about the best agmes of the year"
+```
 
 ## Explore a Website
 
 Once you have set up your virtual environment and created a `.env` file with the appropriate configuration, you can explore a website using the following command:
 
 ```bash
-python -m webrover.explore [website] [out_dir] --iterations [niter] (... options ...)
+python -m skillweaver.explore [website] [out_dir] --iterations [niter] (... options ...)
 ```
 
 Arguments:
+
 - `website`: The URL or name of the website to explore. You can specify a WebArena website by passing in the name of the website (e.g., `shopping`). The available WebArena environments are `shopping`, `shopping_admin`, `map`, `reddit`, and `gitlab`.
 - `out_dir`: The directory to save the exploration results. Note that if a directory already exists at the specified path, the exploration will not start.
 - `--iterations [niter]`: The number of iterations to run the exploration for. Default: 10.
@@ -76,13 +82,10 @@ Arguments:
 - `--success-check-lm-name [lm_name]`: The name of the LLM to use for success checking. Default: `gpt-4o`.
 - `--explore-schedule`: How to perform exploration and testing iterations. Can be of the format `test_probability:X` to test a generated API (if possible) with probability `X`, or `explore:X,test:Y` to alternate between `X` iterations of exploration and `Y` iterations of testing.
 - `--allow-recovery`: Whether to allow the agent to "patch" APIs that throw exceptions during testing. Default: `--allow-recovery`. This can be disabled with `--no-allow-recovery`.
-Here is an example command:
+  Here is an example command:
 
 ```bash
-python -m webrover.explore reddit logs/explore-reddit-gpt4o --agent-lm-name gpt-4o --api-synthesis-lm-name gpt-4o --iterations 160
-
-# TODO information seeking command
-python -m webrover.explore_with_information_seeking reddit logs/explore-reddit-gpt-4o --agent-lm-name gpt-4o --api-synthesis-lm-name gpt-4o --iterations 160
+python -m skillweaver.explore reddit logs/explore-reddit-gpt4o --agent-lm-name gpt-4o --api-synthesis-lm-name gpt-4o --iterations 160
 ```
 
 ## Run Evaluations
@@ -96,8 +99,8 @@ We orchestrate multiple docker container to allow running experiments in paralle
 Before running experiments, we need to run the orchestrator.
 
 ```bash
-python -m webrover.containerization.serve
-ORCHESTRATOR_PORT=5128 python -m webrover.containerization.serve
+python -m skillweaver.containerization.serve
+ORCHESTRATOR_PORT=5128 python -m skillweaver.containerization.serve
 ```
 
 #### Networking Setup
@@ -124,7 +127,7 @@ Use `CONTAINER_SETUP=manual` to use your existing container. If you would like t
 To run the evaluation, use the following command:
 
 ```bash
-python -m webrover.evaluate_benchmark [website] [out_dir] (... options ...)
+python -m skillweaver.evaluate_benchmark [website] [out_dir] (... options ...)
 ```
 
 Arguments:
