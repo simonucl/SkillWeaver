@@ -17,24 +17,14 @@ playwright install
 
 ## Configuration
 
-Create a file called `.env` in the root directory. Then, add your `OPENAI_API_KEY`. If you want to use the `map` environment,
-you must also specify a hostname for the map server in the `MAP_ADDR` environment variable (without the protocol portion, `http://`).
-
 ```bash
-OPENAI_API_KEY=<your_openai_api_key>
-MAP_ADDR=<your_map_server_url>
-IP=<your external IP>
-```
+# OpenAI API
+export OPENAI_API_KEY=<your_openai_api_key>
 
-If instead of the OpenAI API, you would like to use Azure-hosted OpenAI models, you can use the following `.env` template:
-
-```bash
-# Set to 0 to use default OpenAI (which will require the OPENAI_API_KEY variable to be set).
-AZURE_OPENAI=1
-
-# You can then add values to this `.env` file in the format `AZURE_OPENAI_{model_name}_ENDPOINT` and `AZURE_OPENAI_{model_name}_API_KEY`.
-AZURE_OPENAI_gpt-4o_ENDPOINT=<endpoint>
-AZURE_OPENAI_gpt-4o_API_KEY=<endpoint API key>
+# If you'd love to use Azure-hosted OpenAI models instead
+export AZURE_OPENAI=1
+export AZURE_OPENAI_gpt-4o_ENDPOINT=<endpoint>
+export AZURE_OPENAI_gpt-4o_API_KEY=<endpoint API key>
 ```
 
 ## Running A Demo
