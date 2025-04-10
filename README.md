@@ -7,8 +7,8 @@ SkillWeaver is a framework to enable web agent self-improvement through environm
 It is recommended to first create a virtual environment:
 
 ```bash
-conda create -n skillweaver_bck python=3.10
-conda activate skillweaver_bck
+conda create -n skillweaver python=3.10
+conda activate skillweaver
 pip install -r requirements.txt
 playwright install
 ```
