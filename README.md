@@ -10,8 +10,7 @@
 
 SkillWeaver is a skill-centric framework enabling agents to self-improve by autonomously synthesizing reusable skills as APIs. Given a new website, the agent autonomously discovers skills, executes them for practice, and distills practice experiences into robust APIs. Iterative exploration continually expands a library of lightweight, plug-and-play APIs, significantly enhancing the agent's capabilities. 
 
-![Demo Video GIF](assets/final_drug_baseline_boyuan-no_terminal-speedup.gif)
-
+![Demo Video GIF](https://raw.githubusercontent.com/OSU-NLP-Group/SkillWeaver/tree/gh-pages/assets/final_drug_baseline_no_terminal.gif)
 
 ## Installation
 
