@@ -7,6 +7,7 @@ import sys
 import os
 import random
 
+
 def get_video_duration(input_file):
     """
     Uses ffprobe to determine the duration of the input video.
@@ -90,7 +91,7 @@ def extract_segments(input_file, segment_duration=180, num_segments=16):
             "-i",
             input_file,
             "-vf",
-            "setpts=PTS/10,scale=iw/4:ih/4",
+            "setpts=PTS/20,scale=iw/4:ih/4",
             "-an",
             output_file,
         ]
@@ -111,13 +112,29 @@ def combine_segments(num_segments=16, output_file="output.mp4"):
     for i in range(num_segments):
         inputs.extend(["-i", f"seg{i}.mp4"])
 
-    filter_complex = (
-        "[0:v][1:v][2:v][3:v]hstack=inputs=4[row0];"
-        "[4:v][5:v][6:v][7:v]hstack=inputs=4[row1];"
-        "[8:v][9:v][10:v][11:v]hstack=inputs=4[row2];"
-        "[12:v][13:v][14:v][15:v]hstack=inputs=4[row3];"
-        "[row0][row1][row2][row3]vstack=inputs=4"
-    )
+    if num_segments == 16:
+        filter_complex = (
+            "[0:v][1:v][2:v][3:v]hstack=inputs=4[row0];"
+            "[4:v][5:v][6:v][7:v]hstack=inputs=4[row1];"
+            "[8:v][9:v][10:v][11:v]hstack=inputs=4[row2];"
+            "[12:v][13:v][14:v][15:v]hstack=inputs=4[row3];"
+            "[row0][row1][row2][row3]vstack=inputs=4"
+        )
+    elif num_segments == 4:
+        # 2x2 version
+        filter_complex = (
+            "[0:v][1:v]hstack=inputs=2[row0];"
+            "[2:v][3:v]hstack=inputs=2[row1];"
+            "[row0][row1]vstack=inputs=2"
+        )
+    elif num_segments == 9:
+        # 3x3 version
+        filter_complex = (
+            "[0:v][1:v][2:v]hstack=inputs=3[row0];"
+            "[3:v][4:v][5:v]hstack=inputs=3[row1];"
+            "[6:v][7:v][8:v]hstack=inputs=3[row2];"
+            "[row0][row1][row2]vstack=inputs=3"
+        )
 
     cmd = (
         ["ffmpeg", "-y"]
@@ -152,10 +169,12 @@ def main():
         sys.exit(1)
 
     # Extract segments from random non-overlapping portions of the input video
-    extract_segments(input_file)
+    num_segments = 9
+    segment_duration = 360
+    extract_segments(input_file, segment_duration, num_segments)
 
     # Combine the segments into a grid
-    combine_segments()
+    combine_segments(num_segments)
 
 
 if __name__ == "__main__":
