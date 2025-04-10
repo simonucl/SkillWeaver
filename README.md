@@ -2,6 +2,8 @@
 
 SkillWeaver is a framework to enable web agent self-improvement through environment exploration and skill synthesis.
 
+<img width="1558" alt="SkillWeaver main figure." src="https://github.com/user-attachments/assets/d1b4d7f2-7b41-473b-951a-32b73151b7b3" />
+
 ## Installation
 
 It is recommended to first create a virtual environment:
