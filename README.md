@@ -1,4 +1,4 @@
-# SkillWeaver
+<h1 align="center">SkillWeaver <br> Web Agents can Self-Improve by Discovering and Honing Skills</h1>
 
 SkillWeaver is a framework to enable web agent self-improvement through environment exploration and skill synthesis.
 
