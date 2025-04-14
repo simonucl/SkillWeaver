@@ -177,4 +177,10 @@ Arguments:
 
 ### Prompt Organization
 
-The prompts have all been organized into separate .md files and put under `webrover/templates`.
+The prompts have all been organized into separate .md files and put under `skillweaver/templates`.
+
+
+
+## Disclaimer
+
+This dataset was collected and released solely for research purposes, with the goal of making the web more accessible via language technologies. The authors are strongly against any potential harmful use of the data or technology to any party. 
