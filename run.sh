@@ -5,23 +5,19 @@ KNOWLEDGE_BASE_PATH=/Users/simonyu/local/SkillWeaver/logs/explore-shopping-gpt-4
 # python -m skillweaver.attempt_task $WA_REDDIT \
 #     "Post to the gaming forum to ask about the best games of the year"
 
-source ~/.bashrc
-source ~/miniconda3/etc/profile.d/conda.sh
-conda activate agent
-
-MODEL=anthropic/claude-sonnet-4
+MODEL=anthropic/claude-sonnet-4-20250514
 # MODEL=google/gemini-2.5-flash-preview-05-20
 # MODEL=openai/gpt-4o
 MODEL_NAME=$(basename $MODEL)
 
 # Exploration
-# python -m skillweaver.explore $WA_SHOPPING logs/explore-shopping-${MODEL_NAME} \
-#     --agent-lm-name $MODEL --api-synthesis-lm-name $MODEL --success-check-lm-name $MODEL --iterations 50
+python -m skillweaver.explore $WA_SHOPPING logs/explore-shopping-${MODEL_NAME} \
+    --agent-lm-name $MODEL --api-synthesis-lm-name $MODEL --success-check-lm-name $MODEL --iterations 150
 
 # Eval with induced knowledge
-python -m skillweaver.attempt_task $WA_SHOPPING \
-    "Add all visible products to the cart" \
-    --agent-lm-name $MODEL
+# python -m skillweaver.attempt_task $WA_SHOPPING \
+#     "Add all visible products to the cart" \
+#     --agent-lm-name $MODEL
 
 # python -m skillweaver.evaluation.evaluate_benchmark shopping \
 #     output/shopping-${MODEL_NAME}-new \

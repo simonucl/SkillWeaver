@@ -9,6 +9,7 @@ import anthropic
 import dotenv
 import openai
 import PIL.Image
+import litellm
 from openai.types.chat import (
     ChatCompletion,
     ChatCompletionContentPartImageParam,
@@ -38,6 +39,13 @@ async def completion_openai(
     args: dict = NoArgs,  # type: ignore
     key="general",
 ) -> Any:
+    # await aioconsole.aprint("messages:", messages)
+    # await aioconsole.aprint("json_mode:", json_mode)
+    # await aioconsole.aprint("json_schema:", json_schema)
+    # await aioconsole.aprint("tools:", tools)
+    # await aioconsole.aprint("args:", args)
+    # await aioconsole.aprint("key:", key)
+
     if args is NoArgs:
         args = {}
     else:
@@ -132,6 +140,56 @@ async def completion_openai(
                 await aioconsole.aprint("Reached maximum number of tries. Raising.")
                 raise
 
+async def completion_anthropic(
+    client: Any,
+    model: str,
+    messages: list[ChatCompletionMessageParam],
+    json_mode=False,
+    json_schema=None,
+):  
+    tries = 3
+    backoff = 1
+    for i in range(tries):
+        try:
+            # Prepare request parameters for litellm
+            request_params = {
+                "model": model,
+                "messages": messages,
+            }
+            
+            if json_mode:
+                request_params["response_format"] = {"type": "json_object"}
+            elif json_schema is not None:
+                # litellm supports structured output via response_format
+                request_params["response_format"] = {
+                    "type": "json_schema",
+                    "json_schema": json_schema,
+                }
+            
+            # Make the API call using litellm
+            response = await litellm.acompletion(**request_params)
+            
+            # Extract content from response
+            content = response.choices[0].message.content
+            
+            if json_mode or json_schema is not None:
+                return json.loads(content)
+            else:
+                return content
+                
+        except Exception as e:
+            if "JSON" in str(type(e)).upper():
+                await aioconsole.aprint("JSON error:")
+                await aioconsole.aprint("Content:", content if 'content' in locals() else "No content")
+                await aioconsole.aprint(e)
+
+            if i < tries - 1:
+                await aioconsole.aprint(f"Error: {e}. Retrying...")
+                await asyncio.sleep(backoff)
+                backoff = min(30, backoff * 2)
+            else:
+                await aioconsole.aprint("Reached maximum number of tries. Raising.")
+                raise
 
 def create_tool_description(tool: ChatCompletionToolParam):
     name = tool["function"]["name"]
@@ -168,6 +226,7 @@ def _get_openai_client(model_name: str):
     Get from environment variables.
     """
 
+    print("model_name:", model_name)
     if os.getenv("AZURE_OPENAI", "0") == "1":
         endpoint = os.getenv(f"AZURE_OPENAI_{model_name.replace('-', '_')}_ENDPOINT")
         api_key = os.getenv(f"AZURE_OPENAI_{model_name.replace('-', '_')}_API_KEY")
@@ -184,6 +243,10 @@ def _get_openai_client(model_name: str):
             azure_endpoint=endpoint,
             api_key=api_key,
             api_version=api_version,
+        )
+    elif "anthropic" in model_name:
+        return anthropic.AsyncAnthropic(
+            api_key=os.getenv("ANTHROPIC_API_KEY"),
         )
     else:
         # Let OpenAI configure the API key.
@@ -215,20 +278,20 @@ class LM:
     def image_url_content_piece(
         self, image: PIL.Image.Image
     ) -> ChatCompletionContentPartImageParam:
-        if self.is_openai():
+        if self.is_openai() or self.is_anthropic():
             return {
                 "type": "image_url",
                 "image_url": {"url": image_to_data_url(image), "detail": "high"},
             }
-        elif self.is_anthropic():
-            return {
-                "type": "image",  # type: ignore
-                "source": {
-                    "type": "base64",
-                    "media_type": "image/png",
-                    "data": image_to_base64(image),
-                },
-            }
+        # elif self.is_anthropic():
+        #     return {
+        #         "type": "image",  # type: ignore
+        #         "source": {
+        #             "type": "base64",
+        #             "media_type": "image/png",
+        #             "data": image_to_base64(image),
+        #         },
+        #     }
         else:
             raise ValueError("Unknown client type.")
 
@@ -254,13 +317,15 @@ class LM:
                     args={**self.default_kwargs, **kwargs},
                     key=key,
                 )
-            # elif self.is_anthropic():
-            #     client_anthropic: anthropic.AsyncAnthropic = self.client  # type: ignore
-            #     return await client_anthropic.beta.chat.completions.parse(
-            #         model=self.model,
-            #         messages=messages,
-            #         response_format=json_schema,
-            #     )
+            elif self.is_anthropic():
+                client_anthropic: anthropic.AsyncAnthropic = self.client  # type: ignore
+                return await completion_anthropic(
+                    client_anthropic,
+                    self.model,
+                    messages,
+                    json_mode,
+                    json_schema,
+                )
 
     async def json(
         self,
