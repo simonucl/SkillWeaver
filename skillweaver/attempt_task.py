@@ -342,9 +342,10 @@ if __name__ == "__main__":
         start_url: str,
         task: str,
         knowledge_base_path_prefix: Optional[str] = None,
+        agent_lm_name: str = "gpt-4o",
     ):
         asyncio.run(
-            cli(start_url, task, knowledge_base_path_prefix=knowledge_base_path_prefix)
+            cli(start_url, task, knowledge_base_path_prefix=knowledge_base_path_prefix, agent_lm_name=agent_lm_name)
         )
 
     typer.run(run_cli)
