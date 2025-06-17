@@ -36,7 +36,7 @@ from skillweaver.evaluation.webarena_evaluators_with_debug_info import (
 from skillweaver.evaluation.webarena_login import login_subprocess
 from skillweaver.knowledge_base.knowledge_base import KnowledgeBase, load_knowledge_base
 from skillweaver.lm import LM
-from skillweaver.openai_cua.attempt_task import attempt_task as attempt_task_cua
+from skillweaver.attempt_task import attempt_task as attempt_task_cua
 from skillweaver.util.perfmon import monitor
 
 dotenv.load_dotenv()

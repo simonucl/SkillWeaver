@@ -508,7 +508,7 @@ def cli(
                     agent_lm=agent_lm,
                     success_check_lm=success_check_lm,
                     api_synthesis_lm=api_synthesis_lm,
-                    base_urls=["http://" + website] * num_workers,
+                    base_urls=[website] * num_workers,
                     storage_states=[None] * num_workers,
                     iterations=iterations,
                     store_dir=os.path.abspath(out_dir),

@@ -25,7 +25,8 @@ Function = dict
 NoArgs = object()
 
 ResponseFormatT = TypeVar("ResponseFormatT")
-
+OPENAI_CLIENT_URL = "https://openrouter.ai/api/v1"
+OPENAI_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 async def completion_openai(
     client: openai.AsyncAzureOpenAI | openai.AsyncOpenAI,
@@ -186,7 +187,10 @@ def _get_openai_client(model_name: str):
         )
     else:
         # Let OpenAI configure the API key.
-        return openai.AsyncOpenAI()
+        return openai.AsyncOpenAI(
+            base_url=OPENAI_CLIENT_URL,
+            api_key=OPENAI_API_KEY,
+        )
 
 
 class LM:
@@ -250,6 +254,13 @@ class LM:
                     args={**self.default_kwargs, **kwargs},
                     key=key,
                 )
+            # elif self.is_anthropic():
+            #     client_anthropic: anthropic.AsyncAnthropic = self.client  # type: ignore
+            #     return await client_anthropic.beta.chat.completions.parse(
+            #         model=self.model,
+            #         messages=messages,
+            #         response_format=json_schema,
+            #     )
 
     async def json(
         self,

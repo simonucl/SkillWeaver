@@ -99,7 +99,7 @@ def login_subprocess(comb: dict[str, str]):
     print("=====auth_path", auth_path)
 
     command = [
-        "python3",
+        "python",
         "-m",
         "skillweaver.evaluation.webarena_login",
         json.dumps({"comb": comb, "path": auth_path}),
@@ -120,7 +120,7 @@ async def login_subprocess_async(comb: dict[str, str]):
         os.makedirs(auth_dir)
     auth_path = os.path.abspath(f"{auth_dir}/{uuid.uuid4().hex}.json")
     proc = await create_subprocess_exec(
-        "python3",
+        "python",
         "-m",
         "skillweaver.evaluation.webarena_login",
         json.dumps({"comb": comb, "path": auth_path}),

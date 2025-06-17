@@ -59,7 +59,7 @@ def _evaluate_task_subprocess(args: dict) -> SingleTaskEvaluationResult:
             with open(out_dir + "/stderr.txt", "w") as ferr:
                 subprocess.run(
                     [
-                        "python3",
+                        "python",
                         "-m",
                         "skillweaver.evaluation.evaluate_single_task",
                         *[
@@ -206,7 +206,7 @@ def evaluate_benchmark(
                     "allow_recovery": allow_recovery,
                     "enable_unverified": allow_unverified_apis,
                     "set_name": set_name,
-                    "agent_type": agent_type,
+                    # "agent_type": agent_type,
                 }
             )
 

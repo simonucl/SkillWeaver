@@ -336,5 +336,15 @@ async def cli(
 
 if __name__ == "__main__":
     import typer
+    import asyncio
 
-    typer.run(cli)
+    def run_cli(
+        start_url: str,
+        task: str,
+        knowledge_base_path_prefix: Optional[str] = None,
+    ):
+        asyncio.run(
+            cli(start_url, task, knowledge_base_path_prefix=knowledge_base_path_prefix)
+        )
+
+    typer.run(run_cli)
