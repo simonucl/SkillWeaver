@@ -33,6 +33,8 @@ def annotate_source_with_recoveries(
     for recovery in recoveries:
         line = recovery["debug"]["error_function_offset_line"]
         locator = recovery["attempts"][-1]["locator_code"]
+        if line < 0 or line >= len(source_lines):
+            continue  # Skip if the line is out of bounds
         source_lines[
             line
         ] += f" # RECOVERY. Locator should be replaced with (*exact string*): {locator}"

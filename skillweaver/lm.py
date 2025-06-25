@@ -26,8 +26,10 @@ Function = dict
 NoArgs = object()
 
 ResponseFormatT = TypeVar("ResponseFormatT")
-OPENAI_CLIENT_URL = "https://openrouter.ai/api/v1"
-OPENAI_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# OPENAI_CLIENT_URL = "https://openrouter.ai/api/v1"
+OPENAI_CLIENT_URL = "https://api.openai.com/v1"
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+# OPENAI_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 async def completion_openai(
     client: openai.AsyncAzureOpenAI | openai.AsyncOpenAI,

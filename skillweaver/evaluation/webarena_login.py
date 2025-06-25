@@ -13,7 +13,7 @@ from playwright.async_api import async_playwright
 
 HEADLESS = True
 SLOW_MO = 0
-SHOPPING_ADMIN = "ec2-18-118-35-60.us-east-2.compute.amazonaws.com:7780/admin"
+SHOPPING_ADMIN = os.getenv("SHOPPING_ADMIN")
 
 
 # We can do this cheaply on WebArena. May want to improve for live websites.

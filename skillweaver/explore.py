@@ -341,6 +341,24 @@ async def explore(
     worker_semaphore = asyncio.Semaphore(num_workers)
     global_iter_num = 0
 
+    # Find the largest iteration index that is not empty
+    largest_iter_idx = 0
+    if os.path.exists(store_dir):
+        for item in os.listdir(store_dir):
+            if item.startswith("iter_") and os.path.isdir(os.path.join(store_dir, item)):
+                try:
+                    iter_idx = int(item.split("_")[1])
+                    iter_dir = os.path.join(store_dir, item)
+                    # Check if directory is not empty
+                    if os.listdir(iter_dir):
+                        largest_iter_idx = max(largest_iter_idx, iter_idx)
+                except (ValueError, IndexError):
+                    continue
+    if largest_iter_idx > 0:
+        await aprint(f"Continuing from iteration {largest_iter_idx + 1}")
+        global_iter_num = largest_iter_idx + 1
+        knowledge_base = load_knowledge_base(store_dir + f"/iter_{largest_iter_idx}/kb_post")
+
     async def _find_worker_and_run_iteration():
         nonlocal global_iter_num
 
@@ -384,7 +402,7 @@ async def explore(
         try:
 
             await asyncio.gather(
-                *[_find_worker_and_run_iteration() for _ in range(iterations)]
+                *[_find_worker_and_run_iteration() for _ in range(iterations - global_iter_num)]
             )
 
         finally:
