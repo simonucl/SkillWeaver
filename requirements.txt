@@ -41,3 +41,4 @@ beautifulsoup4
 scikit-image
 # This is the version in VWA requirements.txt, so using this.
 evaluate==0.4.0
+litellm

@@ -478,49 +478,84 @@ def cli(
                     else:
                         website_ids.append(website)
 
-                async with containers(website_ids) as addresses:
-                    base_urls = []
-                    storage_states = []
+                website_ports = {
+                    "shopping_admin": 7780,
+                    "shopping": 7770,
+                    "gitlab": 8023,
+                    "map": 3000,
+                    "reddit": 9999,
+                    "homepage": 4399,
+                    "classifieds": 9980,
+                }
 
-                    for key in addresses:
-                        base_url = (
-                            addresses[key]
-                            if not key.startswith("shopping_admin")
-                            else addresses[key] + "/admin"
-                        )
-                        base_urls.append("http://" + base_url)
+                url_ip = os.getenv("IP")
+                base_urls = []
+                storage_states = []
+                for website_id in website_ids:
+                    if website_id.startswith("shopping_admin"):
+                        base_urls.append(f"http://{url_ip}:{website_ports['shopping_admin']}/admin")
+                    else:
+                        base_urls.append(f"http://{url_ip}:{website_ports[website_id]}")
+                
+                for _login_attempt in range(4):
+                    try:
+                        storage_states.append(login_subprocess({website: base_urls[0]}))
+                        break
+                    except Exception as e:
+                        await aprint(f"Error during worker login: {e}")
+                        await aprint(traceback.format_exc())
 
-                        for _login_attempt in range(4):
-                            try:
-                                storage_states.append(
-                                    login_subprocess({website: base_url})
-                                )
-                                break
-                            except Exception as e:
-                                await aprint(f"Error during worker login: {e}")
-                                await aprint(traceback.format_exc())
+                        if _login_attempt == 3:
+                            raise Exception(
+                                "Failed to log in to website after 4 attempts."
+                            )
 
-                                if _login_attempt == 3:
-                                    raise Exception(
-                                        "Failed to log in to website after 4 attempts."
-                                    )
+                if len(storage_states) == 0:
+                    raise Exception("Failed to log in to website after 4 attempts.")
+                    
+                # async with containers(website_ids) as addresses:
+                #     base_urls = []
+                #     storage_states = []
 
-                    await explore(
-                        agent_lm=agent_lm,
-                        success_check_lm=success_check_lm,
-                        api_synthesis_lm=api_synthesis_lm,
-                        base_urls=base_urls,
-                        storage_states=storage_states,
-                        iterations=iterations,
-                        store_dir=os.path.abspath(out_dir),
-                        is_live_website=False,
-                        initial_knowledge_base=initial_knowledge_base,
-                        allow_recovery=allow_recovery,
-                        explore_schedule=explore_schedule,
-                        allow_retrieval_module=allow_retrieval_module,
-                        return_home_every_n_iterations=1,
-                        num_workers=num_workers,
-                    )
+                    # for key in addresses:
+                    #     base_url = (
+                    #         addresses[key]
+                    #         if not key.startswith("shopping_admin")
+                    #         else addresses[key] + "/admin"
+                    #     )
+                    #     base_urls.append("http://" + base_url)
+
+                    #     for _login_attempt in range(4):
+                    #         try:
+                    #             storage_states.append(
+                    #                 login_subprocess({website: base_url})
+                    #             )
+                    #             break
+                    #         except Exception as e:
+                    #             await aprint(f"Error during worker login: {e}")
+                    #             await aprint(traceback.format_exc())
+
+                    #             if _login_attempt == 3:
+                    #                 raise Exception(
+                    #                     "Failed to log in to website after 4 attempts."
+                    #                 )
+
+                await explore(
+                    agent_lm=agent_lm,
+                    success_check_lm=success_check_lm,
+                    api_synthesis_lm=api_synthesis_lm,
+                    base_urls=base_urls,
+                    storage_states=storage_states,
+                    iterations=iterations,
+                    store_dir=os.path.abspath(out_dir),
+                    is_live_website=False,
+                    initial_knowledge_base=initial_knowledge_base,
+                    allow_recovery=allow_recovery,
+                    explore_schedule=explore_schedule,
+                    allow_retrieval_module=allow_retrieval_module,
+                    return_home_every_n_iterations=1,
+                    num_workers=num_workers,
+                )
             else:
                 await explore(
                     agent_lm=agent_lm,

@@ -1,14 +1,18 @@
 KNOWLEDGE_BASE_PATH=/Users/simonyu/local/SkillWeaver/logs/explore-reddit-gpt4o-1/iter_56/kb_post
 KNOWLEDGE_BASE_PATH=/Users/simonyu/local/SkillWeaver/skillnet/shopping/shopping_kb_post
 KNOWLEDGE_BASE_PATH=/Users/simonyu/local/SkillWeaver/logs/explore-shopping-gpt-4o/iter_49/kb_post
-# Sanity check
+# Sanity check 
 # python -m skillweaver.attempt_task $WA_REDDIT \
 #     "Post to the gaming forum to ask about the best games of the year"
 
-MODEL=anthropic/claude-sonnet-4-20250514
+# MODEL=openai/gpt-4.1
+MODEL=gpt-4.1
+# MODEL=openai/gpt-5
+# MODEL=anthropic/claude-sonnet-4-20250514
 # MODEL=google/gemini-2.5-flash-preview-05-20
 # MODEL=openai/gpt-4o
 MODEL_NAME=$(basename $MODEL)
+export DOCKER=true
 
 # Exploration
 python -m skillweaver.explore $WA_SHOPPING logs/explore-shopping-${MODEL_NAME} \
